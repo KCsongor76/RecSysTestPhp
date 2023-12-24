@@ -2,14 +2,10 @@
 include_once 'Rating.php';
 include_once 'Similarity.php';
 
-class InteractionsMatrix2
+class InteractionsMatrix2 extends AbstractInteractionsMatrix
 {
     private array $matrix;
 
-
-    /**
-     * @param array $matrix
-     */
     public function __construct()
     {
         $this->matrix = $this->populateMatrix2();
@@ -129,7 +125,7 @@ class InteractionsMatrix2
      * => returned array = [3.33, 4.66, 3.66, 3]
      * @return array
      */
-    private function averageRatings(): array
+    protected function averageRatings(): array
     {
         $averageRatingsArray = [];
         foreach ($this->matrix as $userRatingRow) {
@@ -174,7 +170,7 @@ class InteractionsMatrix2
      * @param $avgRatings
      * @return array
      */
-    private function removeBias($avgRatings): array
+    protected function removeBias($avgRatings): array
     {
         $biasRemovedMatrix = $this->matrix;
 
@@ -202,7 +198,7 @@ class InteractionsMatrix2
      * @param $selectedUserIndex
      * @return array
      */
-    private function countSimilarities($biasRemovedMatrix, $selectedUserIndex): array
+    protected function countSimilarities($biasRemovedMatrix, $selectedUserIndex): array
     {
         $movies = [];
 

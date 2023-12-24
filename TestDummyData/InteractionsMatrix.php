@@ -1,7 +1,7 @@
 <?php
 include_once 'Rating.php';
 
-class InteractionsMatrix
+class InteractionsMatrix extends AbstractInteractionsMatrix
 {
     private array $matrix;
 
