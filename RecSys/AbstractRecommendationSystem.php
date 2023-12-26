@@ -2,6 +2,8 @@
 
 abstract class AbstractRecommendationSystem
 {
+
+
     /**
      * Makes a connection to the database.
      * @return mysqli|void
@@ -12,7 +14,7 @@ abstract class AbstractRecommendationSystem
         $servername = "localhost";
         $username = "root";
         $password = "";
-        $dbname = "movielens_db_2";
+        $dbname = "testRecSys";
         // Create a new connection
         $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -85,18 +87,4 @@ abstract class AbstractRecommendationSystem
      */
     abstract public function showRecommendations(): void;
 
-    /*
-     queue:
-        have the selectedUserIndex
-        have the selectedMovieIndex
-        create interactionsMatrix
-        create averageArray
-        create biasRemovedInteractionsMatrix
-        create similarityArray
-        sort similarityArray
-        establish the top "n" similar users
-        count prediction, add to predictionsArray
-
-        until last movie
-     */
 }
