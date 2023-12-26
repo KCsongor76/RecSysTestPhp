@@ -20,23 +20,23 @@ class NotRatedMovieIndexesBenchmark
     }
 
     /**
-     * @Revs(10)
+     * @Revs(100)
      * @Iterations(5)
      */
     public function benchOriginalVersion(): void
     {
         $recommendationSystem = new RecommendationSystem($this->selectedUserIndex);
-        $recommendationSystem->getInteractionsMatrix(1);
+        $recommendationSystem->getNotRatedMovieIndexes();
     }
 
     /**
-     * @Revs(10)
+     * @Revs(100)
      * @Iterations(5)
      */
     public function benchOptimizedVersion(): void
     {
         $recommendationSystem = new RecommendationSystem($this->selectedUserIndex);
-        $recommendationSystem->getInteractionsMatrix(1);
+        $recommendationSystem->getNotRatedMovieIndexes2();
     }
 }
 

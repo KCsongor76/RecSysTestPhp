@@ -19,36 +19,15 @@ class RecommendationSystem extends AbstractRecommendationSystem
     public function __construct(int $selectedUserIndex)
     {
         $this->selectedUserIndex = $selectedUserIndex;
-        $notRatedMovieIndexes = [];
-        $interactionsMatrix = [];
-        $averageArray = [];
-        $biasRemovedMatrix = [];
-        $similarityArray = [];
-        $predictionsArray = [];
+        $this->notRatedMovieIndexes = [];
+        $this->interactionsMatrix = [];
+        $this->averageArray = [];
+        $this->biasRemovedMatrix = [];
+        $this->similarityArray = [];
+        $this->predictionsArray = [];
     }
 
     public function getNotRatedMovieIndexes2(): void
-    {
-        $conn = $this->connectToDb();
-        $sql = "SELECT DISTINCT movieId
-                FROM movies
-                WHERE movieId NOT IN
-                (
-                    SELECT movieId
-                    FROM ratings
-                    WHERE userId = ?
-                );";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $this->selectedUserIndex);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            $this->notRatedMovieIndexes[] = $row["movieId"];
-        }
-        $conn->close();
-    }
-
-    public function getNotRatedMovieIndexes(): void
     {
         $conn = $this->connectToDb();
         $sql = "SELECT DISTINCT movieId
