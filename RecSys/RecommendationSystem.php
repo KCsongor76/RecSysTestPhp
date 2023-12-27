@@ -27,7 +27,7 @@ class RecommendationSystem extends AbstractRecommendationSystem
         $this->predictionsArray = [];
     }
 
-    public function getNotRatedMovieIndexes2(): void
+    public function getNotRatedMovieIndexes(): void
     {
         $conn = $this->connectToDb();
         $sql = "SELECT DISTINCT movieId
@@ -47,43 +47,51 @@ class RecommendationSystem extends AbstractRecommendationSystem
         $conn->close();
     }
 
-
-    public function getInteractionsMatrix2(int $selectedMovieIndex): void
+    public function getInteractionsMatrix(int $selectedMovieIndex): void
     {
         $conn = $this->connectToDb();
 
-        // Fetch all interactions for the selected user
+        // Fetch all ratings for the selected user
         $sql = "SELECT movieId, rating FROM ratings WHERE userId = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $this->selectedUserIndex);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        while ($row = $result->fetch_assoc()) {
-            $rating = $row["rating"];
-            $movieId = $row["movieId"];
-            $this->interactionsMatrix[$this->selectedUserIndex][$movieId] = $rating;
+        // Use fetch_all for the first query
+        $userRatings = $result->fetch_all(MYSQLI_ASSOC);
+
+        foreach ($userRatings as $row) {
+            $this->interactionsMatrix[$this->selectedUserIndex][$row["movieId"]] = $row["rating"];
         }
 
-        // Fetch all interactions for users who rated the selected movie
-        $sql = "SELECT userId, movieId, rating FROM ratings WHERE movieId = ?";
+        // Fetch all users who rated the selected movie and their ratings
+        $sql = "
+        SELECT r.userId, r.movieId, r.rating 
+        FROM ratings r
+        INNER JOIN ratings r2 ON r.userId = r2.userId
+        WHERE r2.movieId = ?
+    ";
+
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $selectedMovieIndex);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        while ($row = $result->fetch_assoc()) {
+        // Use fetch_all for fetching all rows at once
+        $movieRatings = $result->fetch_all(MYSQLI_ASSOC);
+
+        foreach ($movieRatings as $row) {
             $userId = $row["userId"];
-            $rating = $row["rating"];
             $movieId = $row["movieId"];
+            $rating = $row["rating"];
+
             $this->interactionsMatrix[$userId][$movieId] = $rating;
         }
-
         $conn->close();
     }
 
-
-    public function getInteractionsMatrix(int $selectedMovieIndex): void
+    public function getInteractionsMatrix2(int $selectedMovieIndex): void
     {
         $conn = $this->connectToDb();
         $sql = "SELECT movieId, rating FROM ratings WHERE userId = ?";
@@ -143,6 +151,7 @@ class RecommendationSystem extends AbstractRecommendationSystem
 
     public function countSimilarities($selectedUserIndex, $selectedMovieIndex): void
     {
+        $this->similarityArray = [];
         foreach ($this->biasRemovedMatrix as $userId => $ratings) {
             $numerator = 0;
             $denominatorLeft = 0;
@@ -208,12 +217,13 @@ class RecommendationSystem extends AbstractRecommendationSystem
             echo $e->getMessage() . "<br>";
         }
         $this->predictionsArray[] = new Prediction($selectedMovieIndex, $prediction);
-        print_r($this->predictionsArray);
     }
 
     public function showRecommendations(): void
     {
         $this->getNotRatedMovieIndexes();
+        # TODO: try to create the/an interactionsMatrix here outside (add - delete rows?)
+        $n = 0;
         foreach ($this->notRatedMovieIndexes as $notRatedMovieIndex) {
             $this->getInteractionsMatrix($notRatedMovieIndex);
             $this->getAverageArray($notRatedMovieIndex);
@@ -221,6 +231,8 @@ class RecommendationSystem extends AbstractRecommendationSystem
             $this->countSimilarities($this->selectedUserIndex, $notRatedMovieIndex);
             $this->sortSimilarities($this->selectedUserIndex, $notRatedMovieIndex);
             $this->countPrediction($this->selectedUserIndex, $notRatedMovieIndex);
+            $n++;
+            echo $n . "\n";
         }
     }
 }

@@ -26,8 +26,6 @@ abstract class AbstractRecommendationSystem
         return $conn;
     }
 
-    abstract function __construct(int $selectedUserIndex);
-
     /**
      * Fills up the $notRatedMovieIndexes with every movie ID (int), which the user didn't rate.
      * @return void
